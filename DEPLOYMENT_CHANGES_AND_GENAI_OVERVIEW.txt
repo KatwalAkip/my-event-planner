@@ -1,0 +1,122 @@
+================================================================================
+GATHERWISE - DEPLOYMENT CHANGES, UPDATES & GEN AI SERVICES OVERVIEW
+================================================================================
+Project: Gatherwise (Calm, Context-Aware GenAI Event Planning Assistant)
+Repository: https://github.com/KatwalAkip/my-event-planner.git
+Stack: Next.js 16 (App Router + Turbopack), React 19, TypeScript 5, Tailwind CSS
+================================================================================
+
+--------------------------------------------------------------------------------
+PART 1: CHANGES & UPDATES MADE IN THE DEPLOYED VERSION
+--------------------------------------------------------------------------------
+
+1. EVENT DASHBOARD & COMMAND CENTER
+   - Comprehensive overview of event health: Days countdown, guest count, location, 
+     budget limit vs. planned/actual expenditure, and milestone completion rate.
+   - "Recommended Next Step" dynamic banner: Intelligently calculates and surfaces 
+     the single highest-priority action required (e.g., resolving overdue tasks, 
+     booking uncontracted vendor categories, or re-allocating budget buffers).
+   - Quick Action triggers for rapid creation of tasks, expenses, vendors, and assistant prompts.
+
+2. DISCIPLINED MULTI-CURRENCY BUDGET PLANNER
+   - Structured categorization across 9 event cost domains (Venue, Catering, Attire, 
+     Decor, Entertainment, Photography, Logistics, Permits, Contingency Reserve).
+   - Strict dual-accounting distinguishing planned cost estimates from actual paid expenses.
+   - Over-budget warning alert: Prominently warns when planned costs exceed the budget 
+     cap without destructively altering or dropping items.
+   - Integer minor-unit currency math: Prevents IEEE 754 floating-point rounding errors 
+     across multiple global currencies (USD, EUR, GBP, CAD, AUD, INR, JPY).
+
+3. ADAPTIVE MILESTONES & TIMELINE TRACKER
+   - Dual-view experience:
+     a) Chronological Phase View: Auto-groups tasks into Overdue, Upcoming This Week, 
+        Next 30 Days, and Later.
+     b) Monthly Calendar Grid View: Visualizes task deadlines in a full month format.
+   - Micro-celebration confetti animations triggered upon milestone completion via canvas-confetti.
+   - Date-shifting engine: Adjusts event dates while allowing relative task deadline 
+     recalculation, preserving custom notes and assignees.
+
+4. VENDOR NEGOTIATION & COORDINATION PIPELINE
+   - Complete vendor pipeline tracking statuses: To Find, Contacted, Quote Received, 
+     Booked, and Not Proceeding.
+   - Tracks points of contact, quote amounts, notes, and response deadlines.
+   - 1-Click "Convert Quote to Budget Item": Seamlessly transfers negotiated vendor quotes 
+     directly into the budget ledger without manual re-entry.
+
+5. CURATED IDEAS & INSPIRATION SPOTLIGHT
+   - Dynamic ideas library spanning Themes, Decor, Food & Beverage, Activities, Favors, 
+     Weather Contingency, and Entertainment.
+   - Filterable by guest scale, budget tier, and aesthetic styles.
+   - Direct integration: 1-click buttons to convert inspiration ideas directly into 
+     actionable timeline tasks or budget line items.
+
+6. DUAL PERSISTENCE & SEEDED DEMO SCENARIOS
+   - Standalone Local Demo Mode: Instant browser-based offline testing via localStorage 
+     with 3 realistic pre-seeded event scenarios:
+     * Maya & Elena's Botanical Garden Wedding (115 guests, $28,000 budget, San Francisco, CA)
+     * Leo's 30th Rooftop Vinyl & Taco Bash (42 guests, $3,800 budget, Brooklyn, NY)
+     * Oakridge Harvest Green Community Fair (260 attendees, $6,500 budget, Austin, TX)
+   - Enterprise Cloud Support: Complete Supabase PostgreSQL schema with Row-Level Security 
+     (RLS) in `supabase/schema.sql` for isolated multi-tenant event management.
+
+
+--------------------------------------------------------------------------------
+PART 2: GEN AI SERVICES UTILIZED IN THE SUBMISSION
+--------------------------------------------------------------------------------
+
+1. OpenAI GPT-4o-mini via Vercel AI SDK (`ai` & `@ai-sdk/openai`)
+   - Technology: Vercel AI SDK Core (`generateText`) connected to OpenAI's `gpt-4o-mini` model.
+   - Where Utilized: 
+     * Endpoint: `src/app/api/assistant/route.ts`
+     * UI Layer: `src/components/assistant/assistant-tab.tsx`
+   - How It Is Utilized:
+     * Deep Context Injection: The API route serializes live event metadata into the 
+       system prompt—including event date, guest count, location, total budget limit, 
+       remaining unallocated budget, overdue task counts, pending vendor needs, style/vibe, 
+       dietary restrictions, and accessibility requirements.
+     * Natural Language Planning: Answers conversational queries (e.g., budget trimming, 
+       caterer interview questions, run-of-show logistics, and thematic ideas).
+     * Structured JSON Proposal Generation: Rather than returning plain text, the GenAI 
+       service is instructed to return structured JSON containing specific, typed 
+       actionable items (suggested tasks with due offsets, suggested budget items with 
+       cost allocations, and personalized concept ideas).
+
+2. Context-Aware Heuristic AI Engine (Zero-Latency Offline Fallback)
+   - Technology: Custom TypeScript contextual reasoning engine.
+   - Where Utilized: 
+     * Service: `src/lib/services/ai-engine.ts`
+     * Invoked from: `src/app/api/assistant/route.ts` and `src/lib/hooks/use-event-store.tsx`
+   - How It Is Utilized:
+     * Ensures 100% resilience and immediate responsiveness if no OpenAI API key is supplied 
+       or during network/API rate-limit downtime.
+     * Analyzes event parameters (overdue milestones, unbooked vendor categories, budget deficits) 
+       and programmatically generates grounded planning guidance and structured recommendations.
+
+3. Interactive GenAI Action Proposal Preview & Approval System
+   - Technology: Zod schema validation (`AssistantRequestSchema`, `AssistantStructuredOutput`) 
+     paired with React 19 interactive cards.
+   - Where Utilized: 
+     * UI Components: `src/components/assistant/action-preview-card.tsx`
+     * State Hook: `src/lib/hooks/use-event-store.tsx`
+   - How It Is Utilized:
+     * Bridges the gap between conversational AI and user data integrity: AI suggestions 
+       never modify the user's plan silently.
+     * Proposals are rendered as interactive checkboxes. Users can inspect, uncheck, 
+       or modify suggested items and click "Add Selected to Event Plan" to commit them into 
+       the live timeline, budget, and ideas database.
+
+
+--------------------------------------------------------------------------------
+PART 3: FILE LOCATION SUMMARY
+--------------------------------------------------------------------------------
+- Main AI API Route:           src/app/api/assistant/route.ts
+- AI Heuristic Engine:          src/lib/services/ai-engine.ts
+- AI Chat & Interactive UI:     src/components/assistant/assistant-tab.tsx
+- AI Proposal Action Cards:     src/components/assistant/action-preview-card.tsx
+- AI Schema & Type Definitions: src/types/event.ts
+- Budget Planning Module:       src/components/budget/budget-tab.tsx
+- Timeline & Milestones Module: src/components/timeline/timeline-tab.tsx
+- Vendor Coordination Module:   src/components/vendors/vendors-tab.tsx
+- Ideas Module:                 src/components/ideas/ideas-tab.tsx
+- Database Architecture & RLS:  supabase/schema.sql
+================================================================================
